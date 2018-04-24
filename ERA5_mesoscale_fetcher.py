@@ -37,7 +37,7 @@ def setupArgParser():
     parser.add_argument(
         '-res',
         type=str,
-        help="Please enter resolution in the dorm 'dx/dy'",
+        help="Please enter resolution in the form 'dx/dy'",
         default="0.25/0.25)")
     parser.add_argument(
         '-interval',
@@ -57,6 +57,8 @@ def parseArgs(parser):
 
 def setArguments(timesteps, args, dic_list):
     for dic in dic_list:
+        dic['date'] = "{}/to/{}".format(args.startdate.strftime("%Y-%m-%d"),
+                                        args.enddate.strftime("%Y-%m-%d"))
         dic['time'] = timesteps
         dic['area'] = args.grid
         dic['grid'] = args.res
@@ -74,7 +76,7 @@ def selectInterval(args):
             "18:00:00/21:00:00"
     else:
         timesteps = "00:00:00/06:00:00/12:00:00/18:00:00/21:00:00"
-        return timesteps
+    return timesteps
 
 
 def sanityCheck(args):
@@ -85,22 +87,24 @@ def sanityCheck(args):
             "ERROR: Wrongly formatted Startdate: {}".format(
                 args.startdate))
         sys.exit(-1)
-        try:
-            end = datetime.datetime.strptime(args.enddate, "%Y%m%d")
-        except ValueError:
+    try:
+        end = datetime.datetime.strptime(args.enddate, "%Y%m%d")
+    except ValueError:
+        logging.error(
+            "ERROR: Wrongly formatted Enddate: {}".format(
+                args.enddate))
+        sys.exit(-1)
+    delta = end - start
+    if delta < datetime.timedelta(0):
+        logging.error("ERROR: Enddate earlier than Startdate: {} -> {}".format(
+                args.startdate, args.enddate))
+        sys.exit(-1)
+    if end.month != start.month:
             logging.error(
-                "ERROR: Wrongly formatted Enddate: {}".format(
-                    args.enddate))
-            delta = end - start
-            if delta < datetime.timedelta(0):
-                logging.error("ERROR: Enddate earlier than Startdate: {} -> {}".format(
-                    args.startdate, args.enddate))
-                sys.exit(-1)
-                if end.month != start.month:
-                    logging.error(
-                        "ERROR: Only dates in the same month are yet supported at the moment.")
-                    logging.error("You can execute the script multiple times")
-                    sys.exit(-1)
+                    "ERROR: Only dates in the same month are yet supported at the moment.")
+            logging.error("You can execute the script multiple times")
+            sys.exit(-1)
+    return start, end
 
 
 def catBinaryOutput(outfile, infiles):
@@ -195,7 +199,7 @@ def fetchCOSMO(args):
             args.grid, args.res))
     dic_list=setArguments(timesteps, args, dic_list)
     logging.info("Starting ecmwf mars request")
-    #p = Pool(3)
+    #p = Pool(len(dic_list))
     #p.map(fetchECMWF, [sfc_dic, pl_dic, ml_dic])
     logging.info("Ecmwf request finished....")
     logging.info("******************************************")
@@ -211,7 +215,32 @@ def fetchCOSMO(args):
 
 
 def fetchWRF(args):
-    pass
+    dic_list, infile_list, out_file = returnModelData(args.model)
+    timesteps = selectInterval(args)
+    logging.info("Timesteps = {}".format(timesteps))
+    logging.info("******************************************")
+    logging.info(
+        "Set grid to {} and resolution to {}".format(
+            args.grid, args.res))
+    dic_list=setArguments(timesteps, args, dic_list)
+    print(dic_list, timesteps
+          )
+    logging.info("Starting ecmwf mars request")
+    p = Pool(len(dic_list))
+    p.map(fetchECMWF, dic_list)
+    logging.info("Ecmwf request finished....")
+    logging.info("******************************************")
+    logging.info("Concat gribs")
+    catBinaryOutput(out_file, infile_list)
+    """
+    logging.info("Split gribs and name them for cosmo")
+    if GRIBAPI:
+        splitGRIBSCOSMOgribapi(out_file)
+    else:
+        splitGRIBSCOSMOeccodes(out_file)
+    cleanup(infile_list)
+    logging.info("Cleaning directory...")
+    """
 
 
 
@@ -228,7 +257,7 @@ if __name__ == "__main__":
     logging.info("******************************************")
     logging.info(" Sanity check of arguments")
     logging.info("******************************************")
-    sanityCheck(args)
+    args.startdate, args.enddate = sanityCheck(args)
     logging.info("Selected model {}".format(args.model))
     logging.info("******************************************")
     if args.model == "cosmo":
