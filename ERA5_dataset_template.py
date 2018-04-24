@@ -161,7 +161,7 @@ Code | Code |   1  |   2  | Name     |  Units   | Description                   
   42 | 112  | 100  | 255  | SM100289 | m3 m-3   | Soil moisture of 100-289 cm ground layer |
 -----+------+------+------+----------+----------+------------------------------------------+
 #
-#  For use with ERA-interim model-level output.
+#  For use with ERA-interim and ERA-5 model-level output.
 #
 #  Grib codes are from Table 128
 #  http://www.ecmwf.int/services/archive/d/parameters/order=grib_parameter/table=128/
@@ -320,8 +320,124 @@ ECMWF_COEFFS="""0 0.000000 0.00000000
 137 0.000000 1.00000000
 """
 
+"""
+******************************************************************************
+COSMO int2lm namelist
+******************************************************************************
+"""
+INT2LM_INPUT="""&CONTRL
+   ydate_ini='$ydate_ini',
+   yinput_model='IFS',
+   hstart=0.0,
+   hstop=$hstop,
+   hincbound=3.0,
+   nincwait=30, 
+   nmaxwait=300,
+   nprocx= 6,
+   nprocy= 10, 
+   nprocio = 0,
+   lasync_io = .FALSE.,
+   linitial=.TRUE.,
+   lboundaries=.TRUE.,
+   lforest=.TRUE.,   
+   lsso = .TRUE.,
+   lradtopo=.FALSE.,
+   llake = .FALSE.,
+   lbdclim=.TRUE.,
+   idbg_level = 100,
+   ltime_mean=.TRUE.,
+   lvertwind_ini=.TRUE.,
+   lvertwind_bd=.TRUE.,
+   lprog_qi=.TRUE.,  
+   lprog_qr_qs=.FALSE.,
+   lprog_qg=.FALSE.,  
+   lmulti_layer_lm=.TRUE.,
+   lmulti_layer_in=.FALSE.,
+   lprog_rho_snow=.FALSE.
+   luse_t_skin=.TRUE.,
+   lfilter_oro=.FALSE.,
+   lfilter_pp=.TRUE.,
+   eps_filter=0.1,
+   norder_filter=5,
+   ilow_pass_oro=4,   
+   numfilt_oro=1,   
+   ilow_pass_xso=5, 
+   numfilt_xso=1,
+   lxso_first=.FALSE.,
+   rxso_mask=750.0,
+   rfill_valley=0.0, 
+   ifill_valley=7,   
+   l_topo_z=.FALSE., 
+   llbc_smooth=.TRUE.,
+   nlbc_smooth=10,
+   l_smi=.TRUE.,
+/
 
-
+&GRID_IN
+  pcontrol_fi     = 30000.,
+  ie_in_tot       = $grid_in_i, 
+  je_in_tot       = $grid_in_j, 
+  ke_in_tot       = 137,
+  pollat_in       = 90.0, 
+  pollon_in       = 180.0, 
+  startlat_in_tot = $start_lat,
+  startlon_in_tot = $start_lon,
+  dlat_in         = $dlat,
+  dlon_in         = $dlon,
+/
+&LMGRID
+  startlat_tot = 0.7,
+  startlon_tot = 103.0, 
+  pollat       = 90.0, 
+  pollon       = 180.0, 
+  dlon         = 0.0025, 
+  dlat         = 0.0025,
+  ielm_tot     = 720,
+  jelm_tot     = 560,
+  kelm_tot     = 60,
+  ivctype = 2,
+  vcflat = 11357.0,
+  vcoord_d=23588.50,22395.93,21304.04,   20307.39,   19399.95,
+     18574.03,   17821.88,   17135.64,   16507.79,   15930.60,
+     15396.52,   14897.86,   14427.98,   13981.10,   13551.52,
+     13133.53,   12721.37,   12312.04,   11900.03,   11485.37,
+     11068.19,   10648.54,   10226.48,    9802.09,    9375.43,
+      8946.58,    8515.59,    8082.55,    7647.52,    7210.55,
+      6771.96,    6332.38,    5896.41,    5468.04,    5050.84,
+      4647.96,    4261.91,    3893.26,    3542.15,    3208.52,
+      2892.23,    2593.71,    2312.95,    2049.75,    1803.89,
+      1575.57,    1364.68,    1170.90,     993.84,     833.44,
+       689.53,     561.52,     448.82,     350.95,     267.55,
+       197.67,     137.23,      87.33,      48.44,      20.00, 0.0,
+/
+&DATABASE
+/
+&DATA
+  ncenter          = 215,
+  nprocess_ini     = 131,
+  nprocess_bd      = 132,
+  ymode_write      = 'w',
+  yinput_type      = 'analysis',
+  ie_ext           = 1600, 
+  je_ext           = 1600,
+  ylmext_form_read = 'ncdf',
+  ylmext_lfn       = 'domain2018041211137.nc',
+  ylmext_cat       = '/mnt/data/std/Singapore/int2lm/extpar'
+  yinext_form_read = "apix",
+  yinext_lfn       = '$eas_first',
+  yinext_cat       = '$input_dir',
+  yin_form_read    = 'apix',
+  yin_cat          = '$input_dir',
+  ylm_cat          = '$output_dir',
+  ylm_form_write   = "ncdf",
+/
+&PRICTR
+  igp_tot = 36, 40, 48, 44, 48, 85, 77,
+  jgp_tot = 30, 94, 38, 26, 26, 96, 12,
+  lchkin  = .TRUE., 
+  lchkout = .TRUE.,
+  lprgp   = .FALSE.,
+/"""
 
 """
 ******************************************************************************
