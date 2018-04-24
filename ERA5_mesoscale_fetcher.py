@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-
-
-from multiprocessing import Pool
+from multiprocessing import Process
+from multiprocessing.managers import SyncManager
+import signal
 try:
     from gribapi import *
     GRIBAPI = True
@@ -13,20 +13,25 @@ import argparse
 import sys
 import datetime
 import os
+import shutil
 
 
 from ecmwfapi import ECMWFDataServer
 from ERA5_dataset_template import returnModelData
 
 
-
-
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
+
+
+def mgr_init():
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    logging.info("Sync manager initalized")
 
 
 def setupArgParser():
     parser = argparse.ArgumentParser(description="Fetch ERA5 gribs from ECMWF")
-    parser.add_argument('-model', type=str, required=True, choices=["cosmo", "wrf"])
+    parser.add_argument('-model', type=str, required=True,
+                        choices=["cosmo", "wrf"])
     parser.add_argument(
         '-startdate', type=str,
         help="Enter Startdate like '20140201'", required=True)
@@ -97,13 +102,13 @@ def sanityCheck(args):
     delta = end - start
     if delta < datetime.timedelta(0):
         logging.error("ERROR: Enddate earlier than Startdate: {} -> {}".format(
-                args.startdate, args.enddate))
+            args.startdate, args.enddate))
         sys.exit(-1)
     if end.month != start.month:
-            logging.error(
-                    "ERROR: Only dates in the same month are yet supported at the moment.")
-            logging.error("You can execute the script multiple times")
-            sys.exit(-1)
+        logging.error(
+            "ERROR: Only dates in the same month are yet supported at the moment.")
+        logging.error("You can execute the script multiple times")
+        sys.exit(-1)
     return start, end
 
 
@@ -121,19 +126,48 @@ def catBinaryOutput(outfile, infiles):
                     out.write(read_bytes)
 
 
+def convertToGrib1gribapi(ifile):
+    with open (ifile, "rb") as inp:
+        with open(ifile + ".grb1", "wb") as output:
+            while True:
+                gid = grib_new_from_file(inp)
+                if gid is None:
+                    break
+                grib_set(gid,'deletePV',1)
+                grib_set(gid,'edition',1)
+                grib_write(gid,output)
+                grib_release(gid)
+    os.rename(ifile + ".grb1", ifile)
+
+ 
+
+def convertToGrib1eccodes(ifile):
+    with open (ifile, "rb") as inp:
+        with open(ifile + ".grb1", "wb") as output:
+            while True:
+                gid = codes_grib_new_from_file(inp)
+                if gid is None:
+                    break
+                codes_set(gid,'deletePV',1)
+                codes_set(gid,'edition',1)
+                codes_write(gid,output)
+                codes_release(gid)
+    os.rename(ifile + ".grb1", ifile)
+
+
 def fetchECMWF(dic):
     server = ECMWFDataServer()
     logging.info("MARS Request: {}".format(dic))
     try:
         server.retrieve(dic)
+    except KeyboardInterrupt:
+        logging.error("SIG INT caught. aborting")
     except BaseException:
         logging.error(
             "ERROR: Something of your request is not working, either "
             "ecmwf or in the request itself")
-        sys.exit(-1)
 
-
-def splitGRIBSCOSMOgribapi(ifile):
+def splitGRIBSgribapi(ifile):
     index_keys = ["dataDate", "dataTime"]
     logging.info("Creating index for grib file")
     iid = grib_index_new_from_file(ifile, index_keys)
@@ -144,6 +178,7 @@ def splitGRIBSCOSMOgribapi(ifile):
     for date in date_vals:
         grib_index_select(iid, index_keys[0], date)
         for time in time_vals:
+            logging.info("Working on {} {}".format(date, time))
             grib_index_select(iid, index_keys[1], time)
             if time == "0":
                 time = "00"
@@ -158,7 +193,7 @@ def splitGRIBSCOSMOgribapi(ifile):
                     grib_release(gid)
 
 
-def splitGRIBSCOSMOeccodes(ifile):
+def splitGRIBSeccodes(ifile):
     index_keys = ["dataDate", "dataTime"]
     logging.info("Creating index for grib file")
     iid = codes_index_new_from_file(ifile, index_keys)
@@ -169,6 +204,7 @@ def splitGRIBSCOSMOeccodes(ifile):
     for date in date_vals:
         codes_index_select(iid, index_keys[0], date)
         for time in time_vals:
+            logging.info("Working on {} {}".format(date, time))
             codes_index_select(iid, index_keys[1], time)
             if time == "0":
                 time = "00"
@@ -186,7 +222,25 @@ def splitGRIBSCOSMOeccodes(ifile):
 def cleanup(files):
     for f in files:
         if os.path.isfile(f):
-            os.remove(r)
+            os.remove(f)
+
+
+def manageProcs(dic_list):
+    manager = SyncManager()
+    manager.start(mgr_init)
+    procs = []
+    for i in range(len(dic_list)):
+        p = Process(target=fetchECMWF, args=(dic_list[i],))
+        p.start()
+        procs.append(p)
+    try:
+        for proc in procs:
+            proc.join()
+    except KeyboardInterrupt:
+        logging.error("SIGINT in main. Aborting")
+    finally:
+        manager.shutdown()
+        sys.exit(-1)
 
 
 def fetchCOSMO(args):
@@ -197,19 +251,18 @@ def fetchCOSMO(args):
     logging.info(
         "Set grid to {} and resolution to {}".format(
             args.grid, args.res))
-    dic_list=setArguments(timesteps, args, dic_list)
+    dic_list = setArguments(timesteps, args, dic_list)
     logging.info("Starting ecmwf mars request")
-    #p = Pool(len(dic_list))
-    #p.map(fetchECMWF, [sfc_dic, pl_dic, ml_dic])
+    manageProcs(dic_list)
     logging.info("Ecmwf request finished....")
     logging.info("******************************************")
     logging.info("Concat gribs")
     #catBinaryOutput(out_file, infile_list)
     logging.info("Split gribs and name them for cosmo")
     if GRIBAPI:
-        splitGRIBSCOSMOgribapi(out_file)
+        splitGRIBSgribapi(out_file)
     else:
-        splitGRIBSCOSMOeccodes(out_file)
+        splitGRIBSeccodes(out_file)
     cleanup(infile_list)
     logging.info("Cleaning directory...")
 
@@ -222,26 +275,23 @@ def fetchWRF(args):
     logging.info(
         "Set grid to {} and resolution to {}".format(
             args.grid, args.res))
-    dic_list=setArguments(timesteps, args, dic_list)
-    print(dic_list, timesteps
-          )
+    dic_list = setArguments(timesteps, args, dic_list)
+    print(dic_list, timesteps)
     logging.info("Starting ecmwf mars request")
-    p = Pool(len(dic_list))
-    p.map(fetchECMWF, dic_list)
+    # manageProcs(dic_list)
     logging.info("Ecmwf request finished....")
     logging.info("******************************************")
     logging.info("Concat gribs")
-    catBinaryOutput(out_file, infile_list)
-    """
-    logging.info("Split gribs and name them for cosmo")
+    #catBinaryOutput(out_file, infile_list)
+    logging.info("Split gribs and name them for wrf")
     if GRIBAPI:
-        splitGRIBSCOSMOgribapi(out_file)
+        convertToGrib1gribapi(out_file)
+        splitGRIBSgribapi(out_file)
     else:
-        splitGRIBSCOSMOeccodes(out_file)
+        convertToGrib1eccodes(out_file)
+        splitGRIBSeccodes(out_file)
     cleanup(infile_list)
     logging.info("Cleaning directory...")
-    """
-
 
 
 if __name__ == "__main__":
