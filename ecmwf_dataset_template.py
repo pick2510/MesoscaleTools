@@ -3,6 +3,12 @@
 Data Structures for COSMO and WRF ecmwfapi requests
 Dominik Strebel, Empa
 *******************************************************************************
+"""
+
+SUPPORTED_MODELS = ["era5", "interim"]
+
+"""
+*******************************************************************************
 ERA 5 and interim MARS default params.
 *******************************************************************************
 """
@@ -32,10 +38,12 @@ wrf_interim_sfc_file = "ERA-interim_sfc.grb"
 wrf_interim_ml_file = "ERA-interim_wrf_ml.grb"
 wrf_interim_out_file = "ERA-interim_wrf_merged.grb"
 
-cosmo_era5_infile_list = [cosmo_era5_sfc_file, cosmo_era5_ml_file, cosmo_era5_pl_file]
+cosmo_era5_infile_list = [cosmo_era5_sfc_file,
+                          cosmo_era5_ml_file, cosmo_era5_pl_file]
 wrf_era5_infile_list = [wrf_era5_sfc_file, wrf_era5_ml_file]
 
-cosmo_interim_infile_list = [cosmo_interim_sfc_file, cosmo_interim_ml_file, cosmo_interim_pl_file]
+cosmo_interim_infile_list = [cosmo_interim_sfc_file,
+                             cosmo_interim_ml_file, cosmo_interim_pl_file]
 wrf_interim_infile_list = [wrf_interim_sfc_file, wrf_interim_ml_file]
 
 """
@@ -46,100 +54,101 @@ COSMO DICS
 
 
 cosmo_era5_sfc_dic = {
-        'stream': 'oper',
-        'class': 'ea',
-        'dataset': 'era5',
-        'date': date,
-        'levtype': "sfc",
-        'param': cosmo_sfc_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': cosmo_era5_sfc_file
+    'stream': 'oper',
+    'class': 'ea',
+    'dataset': 'era5',
+    'date': date,
+    'levtype': "sfc",
+    'param': cosmo_sfc_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': "",
+    'target': cosmo_era5_sfc_file
 }
 cosmo_era5_pl_dic = {
-        'stream': 'oper',
-        'class': 'ea',
-        'dataset': 'era5',
-        'date': date,
-        'levtype': "pl",
-        'param': cosmo_pl_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': cosmo_era5_pl_file
+    'stream': 'oper',
+    'class': 'ea',
+    'dataset': 'era5',
+    'date': date,
+    'levtype': "pl",
+    'param': cosmo_pl_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': "",
+    'target': cosmo_era5_pl_file
 }
 cosmo_era5_ml_dic = {
-        'stream': 'oper',
-        'class': 'ea',
-        'dataset': 'era5',
-        'date': date,
-        'levtype': "ml",
-        'levelist': mod_levs,
-        'param': cosmo_ml_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': cosmo_era5_ml_file
+    'stream': 'oper',
+    'class': 'ea',
+    'dataset': 'era5',
+    'date': date,
+    'levtype': "ml",
+    'levelist': mod_levs,
+    'param': cosmo_ml_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': "",
+    'target': cosmo_era5_ml_file
 }
 
 
-cosmo_era5_dic_list = [cosmo_era5_sfc_dic, cosmo_era5_ml_dic, cosmo_era5_pl_dic]
-
+cosmo_era5_dic_list = [cosmo_era5_sfc_dic,
+                       cosmo_era5_ml_dic, cosmo_era5_pl_dic]
 
 
 cosmo_interim_sfc_dic = {
-        'stream': 'oper',
-        'class': 'ei',
-        'dataset': 'interim',
-        'date': date,
-        'levtype': "sfc",
-        'param': cosmo_sfc_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': cosmo_interim_sfc_file
+    'stream': 'oper',
+    'class': 'ei',
+    'dataset': 'interim',
+    'step'      : "0",
+    'date': date,
+    'levtype': "sfc",
+    'param': cosmo_sfc_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'time': "",
+    'target': cosmo_interim_sfc_file
 }
 cosmo_interim_pl_dic = {
-        'stream': 'oper',
-        'class': 'ei',
-        'dataset': 'interim',
-        'date': date,
-        'levtype': "pl",
-        'param': cosmo_pl_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': cosmo_interim_pl_file
+    'stream': 'oper',
+    'class': 'ei',
+    'step'      : "0",
+    'dataset': 'interim',
+    'date': date,
+    'levtype': "pl",
+    'param': cosmo_pl_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'time': "",
+    'target': cosmo_interim_pl_file
 }
 cosmo_interim_ml_dic = {
-        'stream': 'oper',
-        'class': 'ei',
-        'dataset': 'interim',
-        'date': date,
-        'levtype': "ml",
-        'levelist': mod_levs,
-        'param': cosmo_ml_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': cosmo_interim_ml_file
+    'stream': 'oper',
+    'class': 'ei',
+    'dataset': 'interim',
+    'date': date,
+    'step': "0",
+    'levtype': "ml",
+    'levelist': mod_levs,
+    'param': cosmo_ml_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'time': "",
+    'target': cosmo_interim_ml_file
 }
 
 
-cosmo_interim_dic_list = [cosmo_interim_sfc_dic, cosmo_interim_ml_dic, cosmo_interim_pl_dic]
+cosmo_interim_dic_list = [cosmo_interim_sfc_dic,
+                          cosmo_interim_ml_dic, cosmo_interim_pl_dic]
 """
 ******************************************************************************
 WRF DICS
@@ -148,73 +157,71 @@ WRF DICS
 
 
 wrf_era5_sfc_dic = {
-        'stream': 'oper',
-        'class': 'ea',
-        'dataset': 'era5',
-        'date': date,
-        'levtype': "sfc",
-        'param': wrf_sfc_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': wrf_era5_sfc_file
+    'stream': 'oper',
+    'class': 'ea',
+    'dataset': 'era5',
+    'date': date,
+    'levtype': "sfc",
+    'param': wrf_sfc_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': "",
+    'target': wrf_era5_sfc_file
 }
 
 wrf_era5_ml_dic = {
-        'stream': 'oper',
-        'class': 'ea',
-        'dataset': 'era5',
-        'date': date,
-        'levtype': "ml",
-        'levelist': mod_levs,
-        'param': wrf_ml_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': wrf_era5_ml_file
+    'stream': 'oper',
+    'class': 'ea',
+    'dataset': 'era5',
+    'date': date,
+    'levtype': "ml",
+    'levelist': mod_levs,
+    'param': wrf_ml_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': "",
+    'target': wrf_era5_ml_file
 }
 
 wrf_era5_dic_list = [wrf_era5_sfc_dic, wrf_era5_ml_dic]
 
 
 wrf_interim_sfc_dic = {
-        'stream': 'oper',
-        'class': 'ei',
-        'dataset': 'interim',
-        'date': date,
-        'levtype': "sfc",
-        'param': wrf_sfc_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': wrf_interim_sfc_file
+    'stream': 'oper',
+    'class': 'ei',
+    'dataset': 'interim',
+    'date': date,
+    'levtype': "sfc",
+    'param': wrf_sfc_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': "",
+    'target': wrf_interim_sfc_file
 }
 
 wrf_interim_ml_dic = {
-        'stream': 'oper',
-        'class': 'ei',
-        'dataset': 'interim',
-        'date': date,
-        'levtype': "ml",
-        'levelist': mod_levs,
-        'param': wrf_ml_params,
-        'area': grid,
-        'grid': res,
-        'type': "an",
-        'expver': "1",
-        'time': "",
-        'target': wrf_interim_ml_file
+    'stream': 'oper',
+    'class': 'ei',
+    'dataset': 'interim',
+    'date': date,
+    'levtype': "ml",
+    'levelist': mod_levs,
+    'param': wrf_ml_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': "",
+    'target': wrf_interim_ml_file
 }
 
-wrf_dic_list = [wrf_interim_sfc_dic, wrf_interim_ml_dic]
-
-
+wrf_interim_dic_list = [wrf_interim_sfc_dic, wrf_interim_ml_dic]
 
 
 """
@@ -222,7 +229,7 @@ wrf_dic_list = [wrf_interim_sfc_dic, wrf_interim_ml_dic]
 VTABLE  for wrf
 """
 
-VTABLE="""GRIB | Level| Level| Level| metgrid  |  metgrid | metgrid                                  |
+VTABLE = """GRIB | Level| Level| Level| metgrid  |  metgrid | metgrid                                  |
 Code | Code |   1  |   2  | Name     |  Units   | Description                              |
 -----+------+------+------+----------+----------+------------------------------------------+
  130 | 109  |   *  |      | TT       | K        | Temperature                              |
@@ -270,15 +277,13 @@ Code | Code |   1  |   2  | Name     |  Units   | Description                   
 """
 
 
-
-
 """
 ****************************************************************************
 ECMWF Coefficients for pressure levels
 *****************************************************************************
 """
 
-ECMWF_COEFFS_130="""0 0.000000 0.00000000
+ECMWF_COEFFS_130 = """0 0.000000 0.00000000
 1 2.000365 0.00000000
 2 3.102241 0.00000000
 3 4.666084 0.00000000
@@ -423,7 +428,7 @@ ECMWF_COEFFS_130="""0 0.000000 0.00000000
 COSMO int2lm namelist
 ******************************************************************************
 """
-INT2LM_INPUT="""&CONTRL
+INT2LM_INPUT = """&CONTRL
    ydate_ini='$ydate_ini',
    yinput_model='IFS',
    hstart=0.0,
@@ -543,9 +548,15 @@ Return correct data for the selected model
 ******************************************************************************
 """
 
-def returnModelData(selectedModel):
-    if selectedModel == "cosmo":
-        return cosmo_dic_list, cosmo_era5_infile_list, cosmo_era5_out_file
-    else:
-        return wrf_dic_list, wrf_era5_infile_list, wrf_era5_out_file
 
+def returnModelData(selectedInput, selectedModel):
+    if selectedInput == "era5":
+        if selectedModel == "cosmo":
+            return cosmo_era5_dic_list, cosmo_era5_infile_list, cosmo_era5_out_file
+        else:
+            return wrf_era5_dic_list, wrf_era5_infile_list, wrf_era5_out_file
+    else:
+        if selectedModel == "cosmo":
+            return cosmo_interim_dic_list, cosmo_interim_infile_list, cosmo_interim_out_file
+        else:
+            return wrf_interim_dic_list, wrf_interim_infile_list, wrf_interim_out_file

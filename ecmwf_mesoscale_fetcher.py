@@ -17,8 +17,7 @@ import shutil
 
 
 from ecmwfapi import ECMWFDataServer
-from era5_dataset_template import returnModelData
-
+from ecmwf_dataset_template import  returnModelData, SUPPORTED_MODELS
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
@@ -29,9 +28,11 @@ def mgr_init():
 
 
 def setupArgParser():
-    parser = argparse.ArgumentParser(description="Fetch ERA5 gribs from ECMWF")
-    parser.add_argument('-model', type=str, required=True,
+    parser = argparse.ArgumentParser(description="Fetch ERA[5|-interim] gribs from ECMWF")
+    parser.add_argument('-outmodel', type=str, required=True,
                         choices=["cosmo", "wrf"])
+    parser.add_argument('-inmodel', type=str, required=True,
+                       choices=SUPPORTED_MODELS)
     parser.add_argument(
         '-startdate', type=str,
         help="Enter Startdate like '20140201'", required=True)
@@ -244,7 +245,7 @@ def manageProcs(dic_list):
 
 
 def fetchCOSMO(args):
-    dic_list, infile_list, out_file = returnModelData(args.model)
+    dic_list, infile_list, out_file = returnModelData(args.inmodel, args.outmodel)
     timesteps = selectInterval(args)
     logging.info("Timesteps = {}".format(timesteps))
     logging.info("******************************************")
@@ -268,7 +269,7 @@ def fetchCOSMO(args):
 
 
 def fetchWRF(args):
-    dic_list, infile_list, out_file = returnModelData(args.model)
+    dic_list, infile_list, out_file = returnModelData(args.inmodel, args.outmodel)
     timesteps = selectInterval(args)
     logging.info("Timesteps = {}".format(timesteps))
     logging.info("******************************************")
@@ -308,9 +309,9 @@ if __name__ == "__main__":
     logging.info(" Sanity check of arguments")
     logging.info("******************************************")
     args.startdate, args.enddate = sanityCheck(args)
-    logging.info("Selected model {}".format(args.model))
+    logging.info("Selected model {} -> {}".format(args.inmodel, args.outmodel))
     logging.info("******************************************")
-    if args.model == "cosmo":
+    if args.outmodel == "cosmo":
         fetchCOSMO(args)
     else:
         fetchWRF(args)
