@@ -17,7 +17,7 @@ import shutil
 
 
 from ecmwfapi import ECMWFDataServer
-from Mesoscale_dataset_template import returnModelData
+from era5_dataset_template import returnModelData
 
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
