@@ -4,7 +4,7 @@ Data Structures for COSMO and WRF ecmwfapi requests
 Dominik Strebel, Empa
 *******************************************************************************
 """
-
+import copy
 SUPPORTED_MODELS = ["era5", "interim"]
 
 """
@@ -13,6 +13,9 @@ ERA 5 and interim MARS default params.
 *******************************************************************************
 """
 grid = "5/100/-2/108"
+era_interim_an_times = "00:00:00/06:00:00/12:00:00/18:00:00"
+era_interim_fc_time = "12:00:00"
+era_interim_fc_step = "9"
 res = "0.25/0.25"
 date = "2014-02-01/to/2014-02-28"
 cosmo_sfc_params = "039/040/041/042/043/129/134/139/141/170/172/183/198/235/236/238"
@@ -30,13 +33,13 @@ wrf_era5_ml_file = "ERA5_wrf_ml.grb"
 wrf_era5_out_file = "ERA5_wrf_merged.grb"
 
 
-cosmo_interim_sfc_file = "ERA-interim_cosmo_sfc.grb"
-cosmo_interim_ml_file = "ERA-interim_cosmo_ml.grb"
-cosmo_interim_pl_file = "ERA-interim_cosmo_pl.grb"
+cosmo_interim_sfc_file = "ERA-interim_cosmo_sfc_an.grb"
+cosmo_interim_ml_file = "ERA-interim_cosmo_ml_an.grb"
+cosmo_interim_pl_file = "ERA-interim_cosmo_pl_an.grb"
 cosmo_interim_out_file = "ERA-interim_cosmo_merged.grb"
-wrf_interim_sfc_file = "ERA-interim_sfc.grb"
-wrf_interim_ml_file = "ERA-interim_wrf_ml.grb"
-wrf_interim_out_file = "ERA-interim_wrf_merged.grb"
+wrf_interim_sfc_file = "ERA-interim_sfc_an.grb"
+wrf_interim_ml_file = "ERA-interim_wrf_ml_an.grb"
+wrf_interim_out_file = "ERA-interim_wrf_merged_an.grb"
 
 cosmo_era5_infile_list = [cosmo_era5_sfc_file,
                           cosmo_era5_ml_file, cosmo_era5_pl_file]
@@ -148,7 +151,9 @@ cosmo_interim_ml_dic = {
 
 
 cosmo_interim_dic_list = [cosmo_interim_sfc_dic,
-                          cosmo_interim_ml_dic, cosmo_interim_pl_dic]
+                         cosmo_interim_ml_dic, cosmo_interim_pl_dic]
+
+#cosmo_interim_dic_list = [cosmo_era5_pl_dic]
 """
 ******************************************************************************
 WRF DICS
@@ -548,15 +553,64 @@ Return correct data for the selected model
 ******************************************************************************
 """
 
-
-def returnModelData(selectedInput, selectedModel):
-    if selectedInput == "era5":
-        if selectedModel == "cosmo":
-            return cosmo_era5_dic_list, cosmo_era5_infile_list, cosmo_era5_out_file
-        else:
-            return wrf_era5_dic_list, wrf_era5_infile_list, wrf_era5_out_file
+def selectInterval(dics, args):
+    if args.interval == 1:
+        for dic in dics:
+            dic['time']= "00:00:00/01:00:00/02:00:00/03:00:00/04:00:00/05:00:00/" \
+                "06:00:00/07:00:00/08:00:00/09:00:00/10:00:00/11:00:00/12:00:00/13:00:00/" \
+                "14:00:00/15:00:00/16:00:00/17:00:00/18:00:00/19:00:00/20:00:00/" \
+                "21:00:00/22:00:00/23:00:00"
+    elif args.interval == 3:
+        for dic in dics:
+            dic['time']="00:00:00/03:00:00/06:00:00/09:00:00/12:00:00/15:00:00/" \
+                "18:00:00/21:00:00"
     else:
-        if selectedModel == "cosmo":
-            return cosmo_interim_dic_list, cosmo_interim_infile_list, cosmo_interim_out_file
+        for dic in dics:
+            dic['time'] = "00:00:00/06:00:00/12:00:00/18:00:00/21:00:00"
+    return dics
+
+
+
+
+def returnERAInterimData(selectedModel):
+    if selectedModel == "cosmo":
+        for dic in cosmo_interim_dic_list:
+           dic['time'] =  era_interim_an_times
+        extended_dic_list = copy.deepcopy(cosmo_interim_dic_list)
+        for dic in cosmo_interim_dic_list:
+            dic['time'] = era_interim_fc_time
+            dic['step'] = era_interim_fc_step
+            dic['type'] = "fc"
+            dic['target'] = dic['target'].replace("an", "fc")
+            cosmo_interim_infile_list.append(dic['target'])
+            extended_dic_list.append(dic)
+        return extended_dic_list
+    else: 
+        for dic in wrf_interim_dic_list:
+           dic['time'] =  era_interim_an_times
+        extended_dic_list = copy.deepcopy(wrf_interim_dic_list)
+        for dic in wrf_interim_dic_list:
+            dic['time'] = era_interim_fc_time
+            dic['step'] = era_interim_fc_step
+            dic['type'] = "fc"
+            dic['target'] = dic['target'].replace("an", "fc")
+            wrf_interim_infile_list.append(dic['target'])
+            extended_dic_list.append(dic)
+            print(extended_dic_list)
+        return extended_dic_list
+
+        
+  
+def returnModelData(args):
+    if args.inmodel == "era5":
+        if args.outmodel == "cosmo":
+            return selectInterval(cosmo_era5_dic_list, args), cosmo_era5_infile_list, cosmo_era5_out_file
         else:
-            return wrf_interim_dic_list, wrf_interim_infile_list, wrf_interim_out_file
+            return selectInterval(wrf_era5_dic_list, args), wrf_era5_infile_list, wrf_era5_out_file
+    else:
+        if args.outmodel == "cosmo":
+            return returnERAInterimData("cosmo"), cosmo_interim_infile_list, cosmo_interim_out_file
+        else:
+            return returnERAInterimData("wrf"), wrf_interim_infile_list, wrf_interim_out_file
+
+

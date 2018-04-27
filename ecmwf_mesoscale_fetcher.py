@@ -61,28 +61,14 @@ def parseArgs(parser):
     return parser.parse_args()
 
 
-def setArguments(timesteps, args, dic_list):
+def setArguments(args, dic_list):
     for dic in dic_list:
         dic['date'] = "{}/to/{}".format(args.startdate.strftime("%Y-%m-%d"),
                                         args.enddate.strftime("%Y-%m-%d"))
-        dic['time'] = timesteps
         dic['area'] = args.grid
         dic['grid'] = args.res
     return dic_list
 
-
-def selectInterval(args):
-    if args.interval == 1:
-        timesteps = "00:00:00/01:00:00/02:00:00/03:00:00/04:00:00/05:00:00/" \
-            "06:00:00/07:00:00/08:00:00/09:00:00/10:00:00/11:00:00/12:00:00/13:00:00/" \
-            "14:00:00/15:00:00/16:00:00/17:00:00/18:00:00/19:00:00/20:00:00/" \
-            "21:00:00/22:00:00/23:00:00"
-    elif args.interval == 3:
-        timesteps = "00:00:00/03:00:00/06:00:00/09:00:00/12:00:00/15:00:00/" \
-            "18:00:00/21:00:00"
-    else:
-        timesteps = "00:00:00/06:00:00/12:00:00/18:00:00/21:00:00"
-    return timesteps
 
 
 def sanityCheck(args):
@@ -245,14 +231,13 @@ def manageProcs(dic_list):
 
 
 def fetchCOSMO(args):
-    dic_list, infile_list, out_file = returnModelData(args.inmodel, args.outmodel)
-    timesteps = selectInterval(args)
-    logging.info("Timesteps = {}".format(timesteps))
+    dic_list, infile_list, out_file = returnModelData(args)
+    logging.info("Timesteps = {}".format(args.interval))
     logging.info("******************************************")
     logging.info(
         "Set grid to {} and resolution to {}".format(
             args.grid, args.res))
-    dic_list = setArguments(timesteps, args, dic_list)
+    dic_list = setArguments(args, dic_list)
     logging.info("Starting ecmwf mars request")
     manageProcs(dic_list)
     logging.info("Ecmwf request finished....")
@@ -260,24 +245,22 @@ def fetchCOSMO(args):
     logging.info("Concat gribs")
     #catBinaryOutput(out_file, infile_list)
     logging.info("Split gribs and name them for cosmo")
-    if GRIBAPI:
-        splitGRIBSgribapi(out_file)
-    else:
-        splitGRIBSeccodes(out_file)
-    cleanup(infile_list)
+    #if GRIBAPI:
+    #    splitGRIBSgribapi(out_file)
+    #else:
+    #    splitGRIBSeccodes(out_file)
+    #cleanup(infile_list)
     logging.info("Cleaning directory...")
 
 
 def fetchWRF(args):
-    dic_list, infile_list, out_file = returnModelData(args.inmodel, args.outmodel)
-    timesteps = selectInterval(args)
-    logging.info("Timesteps = {}".format(timesteps))
+    dic_list, infile_list, out_file = returnModelData(args)
+    logging.info("Timesteps = {}".format(args.interval))
     logging.info("******************************************")
     logging.info(
         "Set grid to {} and resolution to {}".format(
             args.grid, args.res))
-    dic_list = setArguments(timesteps, args, dic_list)
-    print(dic_list, timesteps)
+    dic_list = setArguments(args, dic_list)
     logging.info("Starting ecmwf mars request")
     # manageProcs(dic_list)
     logging.info("Ecmwf request finished....")
