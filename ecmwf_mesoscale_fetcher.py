@@ -270,11 +270,11 @@ def fetchWRF(args):
             args.grid, args.res))
     dic_list = setArguments(args, dic_list)
     logging.info("Starting ecmwf mars request")
-    # manageProcs(dic_list)
+    manageProcs(dic_list)
     logging.info("Ecmwf request finished....")
     logging.info("******************************************")
     logging.info("Concat gribs")
-    #catBinaryOutput(out_file, infile_list)
+    catBinaryOutput(out_file, infile_list)
     logging.info("Split gribs and name them for wrf")
     if GRIBAPI:
         convertToGrib1gribapi(out_file)
