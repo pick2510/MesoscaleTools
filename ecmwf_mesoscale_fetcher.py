@@ -216,9 +216,9 @@ def manageProcs(dic_list):
             proc.join()
     except KeyboardInterrupt:
         logging.error("SIGINT in main. Aborting")
-    #finally:
-    #    manager.shutdown()
-    #    sys.exit(-1)
+        raise KeyboardInterrupt
+    finally:
+        manager.shutdown()
 
 
 def fetchCOSMO(args):
@@ -229,7 +229,11 @@ def fetchCOSMO(args):
             args.grid, args.res))
     dic_list = setArguments(args, dic_list)
     logging.info("Starting ecmwf mars request")
-    manageProcs(dic_list)
+    try:
+        manageProcs(dic_list)
+    except:
+        logging.info("ERROR, exiting")
+        sys.exit(-1)
     logging.info("Ecmwf request finished....")
     logging.info("******************************************")
     logging.info("Concat gribs")
@@ -251,7 +255,11 @@ def fetchWRF(args):
             args.grid, args.res))
     dic_list = setArguments(args, dic_list)
     logging.info("Starting ecmwf mars request")
-    manageProcs(dic_list)
+    try:
+        manageProcs(dic_list)
+    except:
+        logging.info("ERROR, exiting")
+        sys.exit(-1)
     logging.info("Ecmwf request finished....")
     logging.info("******************************************")
     logging.info("Concat gribs")
