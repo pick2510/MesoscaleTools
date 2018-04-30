@@ -45,15 +45,6 @@ def setupArgParser():
         type=str,
         help="Please enter resolution in the form 'dx/dy'",
         default="0.25/0.25)")
-    parser.add_argument(
-        '-interval',
-        type=int,
-        choices=[
-            1,
-            3,
-            6],
-        default=3,
-        help="Enter analysis interval between forecast/analysis in hours")
     return parser
 
 
@@ -176,11 +167,7 @@ def splitGRIBSgribapi(ifile):
                     gid = grib_new_from_index(iid)
                     if gid is None:
                         break
-                    if  grib_get(gid, "stepRange") == "9":
-                        with open("eas{}{}".format(date, 21), "ab") as out_fc:
-                             grib_write(gid, out_fc)
-                    else: 
-                        grib_write(gid, out)
+                    grib_write(gid, out)
                     grib_release(gid)
 
 
@@ -206,11 +193,7 @@ def splitGRIBSeccodes(ifile):
                     gid = codes_new_from_index(iid)
                     if gid is None:
                         break
-                    if codes_get(gid, "stepRange") == "9":
-                        with open("eas{}{}".format(date, 21), "ab") as out_fc:
-                             codes_write(gid, out_fc)
-                    else:
-                        codes_write(gid, out)
+                    codes_write(gid, out)
                     codes_release(gid)
 
 
@@ -239,8 +222,7 @@ def manageProcs(dic_list):
 
 
 def fetchCOSMO(args):
-    dic_list, infile_list, out_file = returnModelData(args)
-    logging.info("Timesteps = {}".format(args.interval))
+    dic_list, infile_list, out_file =  returnModelData(args.inmodel, args.outmodel)
     logging.info("******************************************")
     logging.info(
         "Set grid to {} and resolution to {}".format(
@@ -262,8 +244,7 @@ def fetchCOSMO(args):
 
 
 def fetchWRF(args):
-    dic_list, infile_list, out_file = returnModelData(args)
-    logging.info("Timesteps = {}".format(args.interval))
+    dic_list, infile_list, out_file = returnModelData(args.inmodel, args.outmodel)
     logging.info("******************************************")
     logging.info(
         "Set grid to {} and resolution to {}".format(
