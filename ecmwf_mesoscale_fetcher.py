@@ -247,7 +247,7 @@ def fetchCOSMO(args):
             args.grid, args.res))
     dic_list = setArguments(args, dic_list)
     logging.info("Starting ecmwf mars request")
-    #manageProcs(dic_list)
+    manageProcs(dic_list)
     logging.info("Ecmwf request finished....")
     logging.info("******************************************")
     logging.info("Concat gribs")
