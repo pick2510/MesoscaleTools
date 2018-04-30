@@ -216,9 +216,9 @@ def manageProcs(dic_list):
             proc.join()
     except KeyboardInterrupt:
         logging.error("SIGINT in main. Aborting")
-    finally:
-        manager.shutdown()
-        sys.exit(-1)
+    #finally:
+    #    manager.shutdown()
+    #    sys.exit(-1)
 
 
 def fetchCOSMO(args):
