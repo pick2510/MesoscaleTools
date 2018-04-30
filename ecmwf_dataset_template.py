@@ -19,6 +19,7 @@ era_interim_fc_step = "9"
 res = "0.25/0.25"
 date = "2014-02-01/to/2014-02-28"
 cosmo_sfc_params = "039/040/041/042/043/129/134/139/141/170/172/183/198/235/236/238"
+cosmo_sfc_interim_params = "039/040/041/042/129/134/139/141/170/172/183/198/235/236/238"
 cosmo_ml_params = "075/076/130/131/132/133/152/203.200/246/247"
 cosmo_pl_params = "129"
 wrf_sfc_params = "msl/skt/2t/10u/10v/2d/z/lsm/sst/ci/sd/stl1/stl2/stl3/stl4/swvl1/swvl2/swvl3/swvl4"
@@ -112,7 +113,7 @@ cosmo_interim_sfc_dic = {
     'step'      : "0",
     'date': date,
     'levtype': "sfc",
-    'param': cosmo_sfc_params,
+    'param': cosmo_sfc_interim_params,
     'area': grid,
     'grid': res,
     'type': "an",

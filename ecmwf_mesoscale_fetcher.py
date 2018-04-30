@@ -176,7 +176,11 @@ def splitGRIBSgribapi(ifile):
                     gid = grib_new_from_index(iid)
                     if gid is None:
                         break
-                    grib_write(gid, out)
+                    if  grib_get(gid, "stepRange") == "9":
+                        with open("eas{}{}".format(date, 21), "ab") as out_fc:
+                             grib_write(gid, out_fc)
+                    else: 
+                        grib_write(gid, out)
                     grib_release(gid)
 
 
@@ -202,7 +206,11 @@ def splitGRIBSeccodes(ifile):
                     gid = codes_new_from_index(iid)
                     if gid is None:
                         break
-                    codes_write(gid, out)
+                    if codes_get(gid, "stepRange") == "9":
+                        with open("eas{}{}".format(date, 21), "ab") as out_fc:
+                             codes_write(gid, out_fc)
+                    else:
+                        codes_write(gid, out)
                     codes_release(gid)
 
 
@@ -239,16 +247,16 @@ def fetchCOSMO(args):
             args.grid, args.res))
     dic_list = setArguments(args, dic_list)
     logging.info("Starting ecmwf mars request")
-    manageProcs(dic_list)
+    #manageProcs(dic_list)
     logging.info("Ecmwf request finished....")
     logging.info("******************************************")
     logging.info("Concat gribs")
-    #catBinaryOutput(out_file, infile_list)
+    catBinaryOutput(out_file, infile_list)
     logging.info("Split gribs and name them for cosmo")
-    #if GRIBAPI:
-    #    splitGRIBSgribapi(out_file)
-    #else:
-    #    splitGRIBSeccodes(out_file)
+    if GRIBAPI:
+        splitGRIBSgribapi(out_file)
+    else:
+        splitGRIBSeccodes(out_file)
     #cleanup(infile_list)
     logging.info("Cleaning directory...")
 
