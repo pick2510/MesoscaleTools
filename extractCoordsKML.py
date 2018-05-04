@@ -23,7 +23,6 @@ def main():
     for coords in coords_string:
         coords_temp = coords[:-2]
         lon, lat = coords_temp.split(",")
-        print()
         coords_dic["lon"].append(float(lon))
         coords_dic["lat"].append(float(lat))
    # print(min(coords_dic["lat"]), max(coords_dic["lat"), min(coords_dic["lon"]), max(coords_dic["lon"]))
