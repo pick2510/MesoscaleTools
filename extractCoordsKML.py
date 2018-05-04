@@ -23,11 +23,12 @@ def main():
     for coords in coords_string:
         coords_temp = coords[:-2]
         lon, lat = coords_temp.split(",")
-        coords_dic["lon"].append(lon)
-        coords_dic["lat"].append(lat)
+        print()
+        coords_dic["lon"].append(float(lon))
+        coords_dic["lat"].append(float(lat))
    # print(min(coords_dic["lat"]), max(coords_dic["lat"), min(coords_dic["lon"]), max(coords_dic["lon"]))
-    maxlat, minlat, maxlon, minlon = round(float(max(coords_dic["lat"])), 1), round(float(min(
-        coords_dic["lat"])), 1), round(float(max(coords_dic["lon"])), 1),  round(float(min(coords_dic["lon"])), 1)
+    maxlat, minlat, maxlon, minlon = round(max(coords_dic["lat"]), 1), round(min(
+        coords_dic["lat"]), 1), round(max(coords_dic["lon"]), 1),  round(min(coords_dic["lon"]), 1)
     gridstring = "{}/{}/{}/{}".format(maxlat,minlon,minlat,maxlon)
     print(gridstring)
 
