@@ -7,9 +7,9 @@ def main():
         print("Coordinate Extractor from KML")
         print("usage: extractCoordsKML.py [filename]")
         sys.exit(-1)
-    try: 
+    try:
         with open(sys.argv[1], "r") as f:
-            soup = BeautifulSoup(f)
+            soup = BeautifulSoup(f, "lxml")
     except EnvironmentError:
         print("Error opening file {}".format(sys.argv[1]))
         sys.exit(-1)
@@ -20,26 +20,16 @@ def main():
     coords_dic = {}
     coords_dic["lat"] = []
     coords_dic["lon"] = []
-    for i,coords in enumerate(coords_string):
+    for coords in coords_string:
         coords_temp = coords[:-2]
-        print(coords_temp)
-        splitted = coords_temp.split(",")
-        for coord in splitted:
-            print(coord)
-            #coords_dic["lon"].append(coord[0][0])
-            #coords_dic["lat"].append(coord[0][1])
-    #print(coords_dic)
-
-
- 
-
-
-
-
-
-
-
-
+        lon, lat = coords_temp.split(",")
+        coords_dic["lon"].append(lon)
+        coords_dic["lat"].append(lat)
+   # print(min(coords_dic["lat"]), max(coords_dic["lat"), min(coords_dic["lon"]), max(coords_dic["lon"]))
+    maxlat, minlat, maxlon, minlon = round(float(max(coords_dic["lat"])), 1), round(float(min(
+        coords_dic["lat"])), 1), round(float(max(coords_dic["lon"])), 1),  round(float(min(coords_dic["lon"])), 1)
+    gridstring = "{}/{}/{}/{}".format(maxlat,minlon,minlat,maxlon)
+    print(gridstring)
 
 
 if __name__ == "__main__":
