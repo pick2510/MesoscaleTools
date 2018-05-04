@@ -9,6 +9,7 @@ __pycache__/
 
 eas*
 
+*.yaml
 # Distribution / packaging
 .Python
 env/

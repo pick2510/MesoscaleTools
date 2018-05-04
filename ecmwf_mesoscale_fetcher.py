@@ -11,9 +11,14 @@ except ImportError:
 import logging
 import argparse
 import sys
+try: 
+    import yaml
+except ImportError:
+    print("You need to install pyyaml. Issue a 'pip install pyyaml'")
 import datetime
 import os
 import shutil
+
 
 
 from ecmwfapi import ECMWFDataServer
@@ -21,10 +26,38 @@ from ecmwf_dataset_template import  returnModelData, SUPPORTED_MODELS
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
+class DummyObject(object):
+    def __init__(self, config):
+        object.__setattr__(self, 'datastore', {}) 
+        for key in config.keys():
+            object.__setattr__(self, key, config[key])
+
+    def __getattr__(self, key):
+        return self.datastore[key]
+
+    def __setattr__(self, key, value):
+        self.datastore[key] = value
+
 
 def mgr_init():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     logging.info("Sync manager initalized")
+
+def parseYAML():
+    try:
+        with open("config.yaml", "r") as f:
+            stream = f.read()
+    except EnvironmentError:
+        logging.error("ERROR: Couldn't open config.yaml")
+        sys.exit(-1)
+    try:
+        yaml_config = yaml.safe_load(stream)
+    except yaml.YAMLError:
+        logging.error("ERROR: Some kind of parsing error happened.")
+        sys.exit(-1)
+    print(yaml_config)
+    Args = type("Args", (object,), yaml_config)
+    return (Args())
 
 
 def setupArgParser():
@@ -86,7 +119,7 @@ def sanityCheck(args):
         logging.error(
             "ERROR: Only dates in the same month are yet supported at the moment.")
         logging.error("You can execute the script multiple times")
-        sys.exit(-1)
+        #sys.exit(-1)
     return start, end
 
 
@@ -276,11 +309,19 @@ def fetchWRF(args):
 
 
 if __name__ == "__main__":
-    parser = setupArgParser()
-    args = parseArgs(parser)
     logging.info("******************************************")
-    logging.info(" ERA5 for mesoscale simulations fetcher   ")
+    logging.info(" ERA5/interim for mesoscale simulations fetcher   ")
     logging.info("******************************************")
+    if len(sys.argv) == 1:
+        logging.info(" Using configration file config.yaml")
+        logging.info("******************************************")
+        args = parseYAML()
+        print(args.startdate)
+    else:
+        logging.info(" Using command line arguments.....")
+        logging.info("******************************************")
+        parser = setupArgParser()
+        args = parseArgs(parser)
     logging.info("")
     logging.info("******************************************")
     logging.info(" The following arguments were given:")
