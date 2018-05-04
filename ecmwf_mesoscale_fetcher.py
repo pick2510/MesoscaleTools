@@ -276,7 +276,7 @@ def fetchCOSMO(args):
         splitGRIBSgribapi(out_file)
     else:
         splitGRIBSeccodes(out_file)
-    #cleanup(infile_list)
+    cleanup(infile_list)
     logging.info("Cleaning directory...")
 
 
