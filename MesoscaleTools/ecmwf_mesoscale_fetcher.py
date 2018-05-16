@@ -22,7 +22,7 @@ import shutil
 
 
 from ecmwfapi import ECMWFDataServer
-from ecmwf_dataset_template import  returnModelData, SUPPORTED_MODELS
+from .ecmwf_dataset_template import  returnModelData, SUPPORTED_MODELS
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
