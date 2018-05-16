@@ -56,6 +56,7 @@ class Parser(object):
                     ident = self.IDENT.read(line)
                     snd_obj.wban, snd_obj.wmo, snd_obj.lat, snd_obj.lat_dir, snd_obj.lon, snd_obj.lon_dir, snd_obj_elev, snd_obj.rtime = ident[
                         1], ident[2], ident[3], ident[4], ident[5], ident[6], ident[7], ident[8]
+                    print(snd_obj.lon, snd_obj.lat)
                 elif linecode[0] == 2:
                     checks = self.VALS.read(line)
                     snd_obj.hydro, snd_obj.mxwd, snd_obj.tropl, snd_obj.lines, snd_obj.tindex, snd_obj.source = checks[
@@ -86,7 +87,7 @@ for snd in content:
        currentline = lineident.read(line)
 """
 
-p = Parser("2002060600", "2002070810", "10868")
+p = Parser("2002060600", "2002070810", "48698")
 print(p.url)
 p.parse()
 snd = p.soundings
