@@ -4,8 +4,8 @@ import setuptools
 
 import numpy.distutils.core
 ext1 = numpy.distutils.core.Extension(
-    name = "MesoscaleTools._extfortran",
-    sources = ["MesoscaleTools/ext/interp.f90"]
+    name = "MesoscaleTools._fortranext",
+    sources = ["MesoscaleTools/ext/subroutines.f90"]
 )
 ext_modules = [ext1]
 
@@ -43,7 +43,7 @@ numpy.distutils.core.setup(
     platforms = ["any"],
     license = "OSI Approved",
     version =  "0.1 alpha",
-    packages = ['MescoscaleTools'],
+    packages = setuptools.find_packages(),
     ext_modules = ext_modules,
     package_dir = {"MescoscaleTools" : ""},
     download_url = "http://python.org/pypi/wrf-python",

@@ -5,3 +5,4 @@ xarray>0.10
 netCDF4>1.2.0
 ecmwf-api-client>1.0
 eccodes>2.5
+fortranformat>0.2

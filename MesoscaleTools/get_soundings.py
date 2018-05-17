@@ -70,7 +70,7 @@ class Parser(object):
                 else:
                     raise ValueError
             snd_obj.data = pd.DataFrame(data=data, columns=Sounding.COLUMNS)
-            print(snd_obj.data)
+            #print(snd_obj.data)
             self.soundings.append(snd_obj)
 
 
@@ -85,7 +85,7 @@ for snd in content:
     df = pd.DataFrame()
     for line in snd.splitlines():
        currentline = lineident.read(line)
-"""
+
 
 p = Parser("2002060600", "2002070810", "48698")
 print(p.url)
@@ -93,3 +93,4 @@ p.parse()
 snd = p.soundings
 
 print(snd)
+"""
