@@ -193,7 +193,6 @@ function dinterp2d(workarr, nx, ny, nxx, nyy, x_array, y_array, x, y, ierr)
     else if (y < minval(y_array) .or. y > maxval(y_array)) then
         ierr = -1
     end if
-    write(*,*) shape(workarr)
     x0 = x
     y0 = y
     i = binarysearch(nxx,x_array, x0)
@@ -259,4 +258,22 @@ function dinterp2d(workarr, nx, ny, nxx, nyy, x_array, y_array, x, y, ierr)
         binarysearch = right
 
     end function binarysearch
+
+    subroutine dinterp1d (data1d, coords, ncords, loc, out, ierr)
+    implicit none
+    integer, intent(in) :: ncords
+    double precision, intent(in) :: loc
+    double precision, intent(in), dimension(ncords) :: data1d, coords
+    double precision, intent(out) :: out
+    integer, intent(out) :: ierr
+    integer :: i
+
+    ierr  = 0
+    if (loc < minval(coords) .or. loc > maxval(coords)) then
+        ierr = -1 
+    endif
+    i = binarysearch(ncords, coords, loc)
+    out = data1d(i) + (data1d(i+1)- data1d(i))/(coords(i+1) - coords(i)) * (loc - coords(i)) 
+    end subroutine dinterp1d
+
     end module utils

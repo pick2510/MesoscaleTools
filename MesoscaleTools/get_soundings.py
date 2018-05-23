@@ -1,6 +1,7 @@
 import requests
 from fortranformat import FortranRecordReader
 import datetime
+import numpy as np
 import re
 import pandas as pd
 import sys
@@ -15,7 +16,7 @@ class Sounding(object):
 
 
 class Parser(object):
-    URLTEMPLATE = "https://ruc.noaa.gov/raobs/GetRaobs.cgi?shour=All+Times&ltype=All+Levels&wunits=Knots&bdate={bdate}&edate={edate}&access=WMO+Station+Identifier&view=NO&StationIDs={stationID}&osort=Station+Series+Sort&oformat=FSL+format+(ASCII+text)"
+    URLTEMPLATE = "https://ruc.noaa.gov/raobs/GetRaobs.cgi?shour=All+Times&ltype=All+Levels&wunits=Tenths+of+Meters&bdate={bdate}&edate={edate}&access=WMO+Station+Identifier&view=NO&StationIDs={stationID}&osort=Station+Series+Sort&oformat=FSL+format+(ASCII+text)"
     HEADER = FortranRecordReader("(3i7,6x,a4,i7)")
     IDENT = FortranRecordReader("(3i7,f7.2,a1,f6.2,a1,i6,i7)")
     IDENT2 = FortranRecordReader("(i7,10x,a4,14x,i7,5x,a2)")
@@ -70,6 +71,7 @@ class Parser(object):
                 else:
                     raise ValueError
             snd_obj.data = pd.DataFrame(data=data, columns=Sounding.COLUMNS)
+            snd_obj.data = snd_obj.data.replace(99999, np.nan)
             #print(snd_obj.data)
             self.soundings.append(snd_obj)
 
