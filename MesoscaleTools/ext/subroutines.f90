@@ -259,6 +259,8 @@ function dinterp2d(workarr, nx, ny, nxx, nyy, x_array, y_array, x, y, ierr)
 
     end function binarysearch
 
+
+
     subroutine dinterp1d (data1d, coords, ncords, loc, out, ierr)
     implicit none
     integer, intent(in) :: ncords
@@ -275,5 +277,26 @@ function dinterp2d(workarr, nx, ny, nxx, nyy, x_array, y_array, x, y, ierr)
     i = binarysearch(ncords, coords, loc)
     out = data1d(i) + (data1d(i+1)- data1d(i))/(coords(i+1) - coords(i)) * (loc - coords(i)) 
     end subroutine dinterp1d
+
+    subroutine dinterp1darray(data1d, coords, ncords, locarr, nlocs, out, ierr)
+    implicit none
+    integer, intent(in) :: ncords, nlocs
+    double precision, intent(in), dimension(nlocs) :: locarr
+    double precision, intent(in), dimension(ncords) :: data1d, coords
+    double precision, intent(out), dimension(nlocs) :: out
+    double precision, dimension(nlocs) :: res
+    integer, intent(out) :: ierr
+    integer :: i
+    ierr = 0
+    if (minval(locarr) < minval(coords) .or. maxval(locarr) > maxval(coords)) then
+        ierr = -1
+    endif
+ !$OMP PARALLEL DO PRIVATE(i) SHARED(data1d, coords, locarr, ierr, ncords)
+    do i=1,nlocs
+        call dinterp1d(data1d, coords, ncords, locarr(i), res(i), ierr)
+    end do
+ !$OMP END PARALLEL DO
+    out = res
+    end subroutine dinterp1darray
 
     end module utils

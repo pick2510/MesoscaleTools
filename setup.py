@@ -5,7 +5,9 @@ import setuptools
 import numpy.distutils.core
 ext1 = numpy.distutils.core.Extension(
     name = "MesoscaleTools._fortranext",
-    sources = ["MesoscaleTools/ext/subroutines.f90"]
+    sources = ["MesoscaleTools/ext/subroutines.f90"],
+    #extra_f90_compile_args = ["-fopenmp"],
+    extra_link_args = ["-lgomp"]
 )
 ext_modules = [ext1]
 

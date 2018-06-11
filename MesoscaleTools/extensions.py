@@ -11,6 +11,13 @@ def interp1d(field1d, coords, loc):
     else:
         return val
 
+def interp1darray(field1d, coords, locarray):
+    val, ierr = ext.utils.dinterp1darray(field1d, coords, locarray)
+    if ierr == -1:
+        return val
+    else:
+        return val
+
 
 def interp2d(field2d, xcoords, ycoords, x, y):
     num, ierr =  ext.utils.dinterp2d(field2d.T, xcoords, ycoords, x, y)
