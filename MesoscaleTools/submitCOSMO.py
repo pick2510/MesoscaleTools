@@ -26,7 +26,8 @@ conf = {
     "runpathops": ["rm -f YU*"],
     "email": "dominik.strebel@empa.ch",
     "jobname": None,  # if None, generate one for you
-    "modules": ["pgi/17.10", "openmpi/2.1.2/pgi/17.10"],
+    "modules": ["pgi/17.10",
+                "openmpi/2.1.2/pgi/17.10"],
     "runpath": None,  # if None, os.getcwd()
     "mpirunner": "mpirun",
     "epath": None,  # if None, runpath
@@ -210,8 +211,10 @@ def changeNamelist():
     with open(namelist[conf["simulation"]], "w") as f:
         f.write(nl)
 
+
 def submitJob(job):
-    proc = subprocess.Popen([conf["batch"]], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        [conf["batch"]], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     outs, errs = proc.communicate(job)
     return outs
 
