@@ -118,8 +118,12 @@ def divisorGenerator(n):
 
 
 def getNProcXY(nproc):
-    divs = list(divisorGenerator(nproc))
-    return int(divs[len(divs)//2]), int(divs[len(divs)//2-1])
+    root = int(math.sqrt(nproc))
+    if root ** 2 == nproc:
+        return root, root
+    else:
+        divs = list(divisorGenerator(nproc))
+        return int(divs[len(divs)//2]), int(divs[len(divs)//2-1])
 
 
 def setupArgParser():
