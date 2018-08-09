@@ -1,10 +1,15 @@
 import requests
+from bs4 import BeautifulSoup
+import struct
 from fortranformat import FortranRecordReader
+from contextlib import contextmanager
 import datetime
 import numpy as np
 import re
 import pandas as pd
 import sys
+import locale
+import threading
 
 
 class Sounding(object):
@@ -28,7 +33,7 @@ class Parser(object):
         self.bdate = bdate
         self.edate = edate
         self.stationID = stationID
-        self.url = self.URLTEMPLATE.format(
+        self.ur = self.URLTEMPLATE.format(
             bdate=self.bdate, edate=self.edate, stationID=self.stationID)
         self.soundings = []
 
@@ -38,7 +43,8 @@ class Parser(object):
             print("ERROR, Something is wrong in your request")
             print(req.text)
             return
-        content  = ["    254" + x for x in re.split(self.SPLIT_REGEX, req.text)][1:]
+        content = ["    254" +
+                   x for x in re.split(self.SPLIT_REGEX, req.text)][1:]
         #content = ["    254" + x for x in req.text.split("    254")][1:]
         for snd in content:
             snd_obj = Sounding()
@@ -72,7 +78,62 @@ class Parser(object):
                     raise ValueError
             snd_obj.data = pd.DataFrame(data=data, columns=Sounding.COLUMNS)
             snd_obj.data = snd_obj.data.replace(99999, np.nan)
-            #print(snd_obj.data)
+            # print(snd_obj.data)
+            self.soundings.append(snd_obj)
+
+
+class UWYOParser(object):
+    URLTEMPLATE = "http://weather.uwyo.edu/cgi-bin/sounding?TYPE=TEXT%3ALIST&YEAR={year}&MONTH={month}&FROM={fr}&TO={to}&STNM={station}"
+    FORMAT = "<7s7s7s7s7s7s7s7s7s7s7s"
+    LOCALE_LOCK = threading.Lock()
+
+
+    def __init__(self, bdate, edate, stationID):
+        self.bdate = bdate
+        self.edate = edate
+        self.stationID = stationID
+        self.year = bdate[0:4]
+        self.month = bdate[4:6]
+        self.fr = bdate[6:10]
+        self.to = edate[6:10]
+        self.url = self.URLTEMPLATE.format(
+            year=self.year, month=self.month, fr=self.fr, to=self.to, station=self.stationID)
+        self.soundings = []
+    
+    @contextmanager
+    def setlocale(self, name):
+        with self.LOCALE_LOCK:
+            saved = locale.setlocale(locale.LC_ALL)
+            try:
+                yield locale.setlocale(locale.LC_ALL, name)
+            finally:
+                locale.setlocale(locale.LC_ALL, saved)
+
+    def parse(self):
+        req = requests.get(self.url)
+        if "Sorry" in req.text or "ERROR" in req.text:
+            print("ERROR, Something is wrong in your request")
+            print(req.text)
+            return
+        self._soup = BeautifulSoup(req.content, "lxml")
+        self._lsoundings = [i.string for i in self._soup.findAll("h2")]
+        self._soundings = [i.string.splitlines()[5:]
+                           for i in self._soup.findAll("pre") if "HGHT" in i.string]
+        self._headers = [i.string.splitlines()[2].split()
+                         for i in self._soup.findAll("pre") if "HGHT" in i.string]
+        for i, snd in enumerate(self._soundings):
+            data = []
+            snd_obj = Sounding()
+            timestring = self._lsoundings[i][-15:]
+            with self.setlocale('C'):
+                date = datetime.datetime.strptime(timestring, "%HZ %d %b %Y")
+            for line in snd:
+                data.append([res.strip()
+                             for res in struct.unpack(self.FORMAT, line)])
+            snd_obj.data = pd.DataFrame(data=data, columns=self._headers[i])
+            snd_obj.datetime = date
+            for column in snd_obj.data.columns:
+                snd_obj.data[column] = pd.to_numeric(snd_obj.data[column])
             self.soundings.append(snd_obj)
 
 
@@ -83,7 +144,8 @@ req = requests.get(res)
 
 sounding_dic = {} 
 
-for snd in content:
+for snd in content:            print(snd_obj.data)
+
     df = pd.DataFrame()
     for line in snd.splitlines():
        currentline = lineident.read(line)
@@ -95,4 +157,11 @@ p.parse()
 snd = p.soundings
 
 print(snd)
+"""
+"""
+p = UWYOParser(bdate="2013061200", edate="2013062919", stationID="48698")
+print(p.url)
+p.parse()
+# print(p._soundings)
+# print(p._headers)
 """
