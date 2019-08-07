@@ -21,8 +21,9 @@ import shutil
 
 
 
-from ecmwfapi import ECMWFDataServer
-from .ecmwf_dataset_template import  returnModelData, SUPPORTED_MODELS
+#from ecmwfapi import ECMWFDataServer
+from cdsapi import Client
+from ecmwf_dataset_template import  returnModelData, SUPPORTED_MODELS
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
@@ -167,10 +168,10 @@ def convertToGrib1eccodes(ifile):
 
 
 def fetchECMWF(dic):
-    server = ECMWFDataServer()
+    server = Client()
     logging.info("MARS Request: {}".format(dic))
     try:
-        server.retrieve(dic)
+        server.retrieve("reanalysis-era5-complete",dic, dic['target'])
     except KeyboardInterrupt:
         logging.error("SIG INT caught. aborting")
     except BaseException:
