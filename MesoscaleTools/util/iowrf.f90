@@ -76,6 +76,7 @@
       INCLUDE 'netcdf.inc'
       integer  :: jdim
       parameter (jdim=6)
+      integer, parameter :: deflate_lev = 5
       integer ncid, status
       integer ishape(jdim)
       integer ishape2(jdim)
@@ -132,11 +133,7 @@
 ! output_file is input_file_new
       status = nf_open(input_file, 0, ncid)
       if (status .ne. nf_noerr) call handle_err(status)
-      if (bit64) then
-        status = nf_create(output_file, NF_64BIT_OFFSET, mcid)
-      else
-        status = nf_create(output_file,  NF_NETCDF4 , mcid)
-      endif
+      status = nf_create(output_file,  NF_NETCDF4 , mcid)
       if (status .ne. nf_noerr) call handle_err(status)
 
 ! GET BASIC INFORMTION ABOUT THE FILE
@@ -331,7 +328,7 @@
         end if
 
         status = nf_def_var(mcid, cval, itype, idm, ishape2, i)
-        status = nf_def_var_deflate(mcid, i, 0, 1, 5)
+        status = nf_def_var_deflate(mcid, i, 0, 1, deflate_lev)
         do na = 1, natt
           status = nf_inq_attname(ncid, i, na, name)
           status = nf_copy_att(ncid, i, name, mcid, i)
@@ -486,12 +483,21 @@
             if     (idm .eq. 4 .AND. (dims_in(1) > dims_out(1)) ) then
               IF (debug) write(6,*) '   de-staggering in the X direction'
               data2 = (data(1:dims_in(1)-1,:,:,:)+data(2:dims_in(1),:,:,:))*.5
+              status = nf_redef(mcid)
+              status = nf_put_att_text(mcid, i, 'coordinates', 16, 'XLONG XLAT XTIME')
+              status = nf_enddef(mcid)
             elseif (idm .eq. 4 .AND. (dims_in(2) > dims_out(2)) ) then
               IF (debug) write(6,*) '   de-staggering in the Y direction'
               data2 = (data(:,1:dims_in(2)-1,:,:)+data(:,2:dims_in(2),:,:))*.5
+               status = nf_redef(mcid)
+              status = nf_put_att_text(mcid, i, 'coordinates', 16, 'XLONG XLAT XTIME')
+              status = nf_enddef(mcid)
             elseif (idm .eq. 4 .AND. (dims_in(3) > dims_out(3)) ) then
               IF (debug) write(6,*) '   de-staggering in the Y direction'
               data2 = (data(:,:,1:dims_in(3)-1,:)+data(:,:,2:dims_in(3),:))*.5
+               status = nf_redef(mcid)
+              status = nf_put_att_text(mcid, i, 'coordinates', 16, 'XLONG XLAT XTIME')
+              status = nf_enddef(mcid)
             else
               data2 = data
             endif
@@ -559,12 +565,21 @@
             if     (idm .eq. 4 .AND. (dims_in(1) > dims_out(1)) ) then
               IF (debug) write(6,*) '   de-staggering in the X direction'
               ddata2 = (ddata(1:dims_in(1)-1,:,:,:)+ddata(2:dims_in(1),:,:,:))*.5
+              status = nf_redef(mcid)
+              status = nf_put_att_text(mcid, i, 'coordinates', 16, 'XLONG XLAT XTIME')
+              status = nf_enddef(mcid)
             elseif (idm .eq. 4 .AND. (dims_in(2) > dims_out(2)) ) then
               IF (debug) write(6,*) '   de-staggering in the Y direction'
               ddata2 = (ddata(:,1:dims_in(2)-1,:,:)+ddata(:,2:dims_in(2),:,:))*.5
+              status = nf_redef(mcid)
+              status = nf_put_att_text(mcid, i, 'coordinates', 16, 'XLONG XLAT XTIME')
+              status = nf_enddef(mcid)
             elseif (idm .eq. 4 .AND. (dims_in(3) > dims_out(3)) ) then
               IF (debug) write(6,*) '   de-staggering in the Z direction'
               ddata2 = (ddata(:,:,1:dims_in(3)-1,:)+ddata(:,:,2:dims_in(3),:))*.5
+              status = nf_redef(mcid)
+              status = nf_put_att_text(mcid, i, 'coordinates', 16, 'XLONG XLAT XTIME')
+              status = nf_enddef(mcid)
             else
               ddata2 = ddata
             endif
@@ -669,8 +684,10 @@
   numarg = iargc()
   i = 1
 
-  if (numarg .lt. 1) call help_info
-
+  if (numarg .lt. 1) then  
+    call help_info
+    call exit(-1)
+  else
   do while (i <= numarg)
     call getarg(i,dummy)
 
@@ -738,8 +755,6 @@
                  idummy1 = 0
                  idummy2 = 0
                ENDDO
-          CASE ("-64bit")
-               bit64 = .TRUE.
           CASE DEFAULT
                call help_info
       END SELECT
@@ -751,8 +766,11 @@
 
   enddo
 
-  if (input_file == " ") call help_info
-
+  if (input_file == " ")  then 
+    call help_info
+    call exit(-1)
+  end if
+  end if
   end subroutine read_args
 !------------------------------------------------------------------------------
 
@@ -789,7 +807,6 @@
   print*," "
   print*," -A        : De-stagger output"
   print*," "
-  print*," -64bit    : To create large 64bit data files"
   print*," "
   end subroutine help_info
 
