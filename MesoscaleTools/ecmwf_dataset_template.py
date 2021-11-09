@@ -32,6 +32,10 @@ wrf_era5_sfc_file = "ERA5_wrf_sfc.grb"
 wrf_era5_ml_file = "ERA5_wrf_ml.grb"
 wrf_era5_out_file = "ERA5_wrf_merged.grb"
 
+nc_era5_sfc_file = "ERA5_sfc.nc"
+nc_era5_ml_file = "ERA5_ml.nc"
+nc_era5_out_file = None
+
 
 cosmo_interim_sfc_file = "ERA-interim_cosmo_sfc.grb"
 cosmo_interim_ml_file = "ERA-interim_cosmo_ml.grb"
@@ -41,6 +45,7 @@ wrf_interim_sfc_file = "ERA-interim_sfc.grb"
 wrf_interim_ml_file = "ERA-interim_wrf_ml.grb"
 wrf_interim_out_file = "ERA-interim_wrf_merged.grb"
 
+
 cosmo_era5_infile_list = [cosmo_era5_sfc_file,
                           cosmo_era5_ml_file, cosmo_era5_pl_file]
 wrf_era5_infile_list = [wrf_era5_sfc_file, wrf_era5_ml_file]
@@ -48,6 +53,8 @@ wrf_era5_infile_list = [wrf_era5_sfc_file, wrf_era5_ml_file]
 cosmo_interim_infile_list = [cosmo_interim_sfc_file,
                              cosmo_interim_ml_file, cosmo_interim_pl_file]
 wrf_interim_infile_list = [wrf_interim_sfc_file, wrf_interim_ml_file]
+
+nc_era5_infile_list = [nc_era5_ml_file, nc_era5_sfc_file]
 
 """
 *******************************************************************************
@@ -225,6 +232,49 @@ wrf_interim_ml_dic = {
 }
 
 wrf_interim_dic_list = [wrf_interim_sfc_dic, wrf_interim_ml_dic]
+
+
+
+"""
+******************************************************************************
+NC DICS
+******************************************************************************
+"""
+nc_era5_sfc_dic = {
+    'stream': 'oper',
+    'class': 'ea',
+    'dataset': 'era5',
+    'date': date,
+    'levtype': "sfc",
+    'param': wrf_sfc_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': times_era5,
+    'target': nc_era5_sfc_file,
+    'format': "netcdf"
+}
+
+nc_era5_ml_dic = {
+    'stream': 'oper',
+    'class': 'ea',
+    'dataset': 'era5',
+    'date': date,
+    'levtype': "ml",
+    'levelist': mod_levs,
+    'param': wrf_ml_params,
+    'area': grid,
+    'grid': res,
+    'type': "an",
+    'expver': "1",
+    'time': times_era5,
+    'target': nc_era5_ml_file,
+    'format': "netcdf"
+}
+
+nc_era5_dic_list = [nc_era5_sfc_dic, nc_era5_ml_dic]
+
 
 
 """
@@ -556,8 +606,10 @@ def returnModelData(selectedInput, selectedModel):
     if selectedInput == "era5":
         if selectedModel == "cosmo":
             return cosmo_era5_dic_list, cosmo_era5_infile_list, cosmo_era5_out_file
-        else:
+        elif selectedModel == "wrf":
             return wrf_era5_dic_list, wrf_era5_infile_list, wrf_era5_out_file
+        else:
+            return nc_era5_dic_list, nc_era5_infile_list, nc_era5_out_file
     else:
         if selectedModel == "cosmo":
             return cosmo_interim_dic_list, cosmo_interim_infile_list, cosmo_interim_out_file

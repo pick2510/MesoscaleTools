@@ -308,6 +308,22 @@ def fetchWRF(args):
     cleanup(infile_list)
     logging.info("Cleaning directory...")
 
+def fetchNC(args):
+    dic_list, infile_list, out_file = returnModelData(args.inmodel, args.outmodel)
+    logging.info("******************************************")
+    logging.info(
+        "Set grid to {} and resolution to {}".format(
+            args.grid, args.res))
+    dic_list = setArguments(args, dic_list)
+    logging.info("Starting ecmwf mars request")
+    try:
+        manageProcs(dic_list)
+    except:
+        logging.info("ERROR, exiting")
+        sys.exit(-1)
+    logging.info("Ecmwf request finished....")
+    logging.info("******************************************")
+
 
 if __name__ == "__main__":
     logging.info("******************************************")
@@ -335,7 +351,9 @@ if __name__ == "__main__":
     logging.info("******************************************")
     if args.outmodel == "cosmo":
         fetchCOSMO(args)
-    else:
+    elif args.outmodel == "wrf":
         fetchWRF(args)
+    else:
+        fetchNC(args)
     logging.info("Done fetching.")
     logging.info("Generating Envrionment")
